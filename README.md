@@ -29,3 +29,22 @@ The theme reads live products, categories, prices, stock, images, weights and av
 
 ## Design note
 The visual direction is original to Ntamba Processors and uses the provided Kaffa reference only as high-level presentation inspiration. No Kaffa code, branding, artwork or content is included.
+
+
+## Build an installable WordPress ZIP
+
+From the repository root, package the `ntamba-processors` theme directory as the installable WordPress ZIP.
+
+### Windows PowerShell
+
+```powershell
+.\scripts\package-theme.ps1
+```
+
+### macOS/Linux
+
+```bash
+bash ./scripts/package-theme.sh
+```
+
+Both scripts produce `ntamba-processors.zip` with the correct top-level theme folder. Upload that ZIP in WordPress under **Appearance → Themes → Add New → Upload Theme**.
