@@ -1,7 +1,7 @@
 <?php get_header(); ?>
 <main id="primary">
 <section class="hero">
-  <?php $hero=get_theme_mod('ntamba_hero_image',''); if($hero): ?>
+  <?php $hero=get_theme_mod('ntamba_hero_image',''); if(!$hero && class_exists('WooCommerce')){ $hero_products=wc_get_products(array('status'=>'publish','limit'=>1,'orderby'=>'date','order'=>'DESC')); if($hero_products && $hero_products[0]->get_image_id()) $hero=wp_get_attachment_image_url($hero_products[0]->get_image_id(),'full'); } if($hero): ?>
     <img class="hero-media" src="<?php echo esc_url($hero); ?>" alt="<?php echo esc_attr__('Ntamba farm and agricultural products','ntamba-processors'); ?>" loading="eager" fetchpriority="high">
   <?php endif; ?>
   <div class="container hero-content">
