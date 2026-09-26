@@ -1,6 +1,6 @@
 <?php
 if(!defined('ABSPATH')) exit;
-define('NTAMBA_VERSION','1.3.0');
+define('NTAMBA_VERSION','1.3.1');
 define('NTAMBA_URI',get_template_directory_uri());
 
 function ntamba_setup(){
