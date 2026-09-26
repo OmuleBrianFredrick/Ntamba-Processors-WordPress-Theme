@@ -74,12 +74,5 @@ function ntamba_wc_render(){
 /* WooCommerce storefront polish */
 add_filter('woocommerce_enqueue_styles',function($styles){return $styles;});
 add_filter('woocommerce_breadcrumb_defaults',function($defaults){$defaults['delimiter']=' <span class="breadcrumb-separator">/</span> ';return $defaults;});
-add_action('woocommerce_before_main_content',function(){echo '<div class="container content-area woocommerce-area">';},5);
-add_action('woocommerce_after_main_content',function(){echo '</div>';},5);
-add_action('woocommerce_before_shop_loop',function(){echo '<div class="shop-toolbar"><div class="shop-result-count">';},19);
-add_action('woocommerce_before_shop_loop',function(){echo '</div><div class="shop-ordering">';},30);
-add_action('woocommerce_before_shop_loop',function(){echo '</div></div>';},40);
-add_action('woocommerce_before_single_product',function(){echo '<div class="container content-area">';},5);
-add_action('woocommerce_after_single_product',function(){echo '</div>';},5);
 add_action('woocommerce_single_product_summary',function(){global $product;if($product){$gtin=ntamba_gtin($product);if($gtin)echo '<div class="product-code"><strong>GTIN/EAN:</strong> '.esc_html($gtin).'</div>'; }},39);
 add_filter('body_class',function($classes){if(function_exists('is_woocommerce') && is_woocommerce())$classes[]='ntamba-commerce';return $classes;});
