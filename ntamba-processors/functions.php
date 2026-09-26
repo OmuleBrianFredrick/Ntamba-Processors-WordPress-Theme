@@ -33,7 +33,16 @@ add_action('customize_register','ntamba_customize');
 function ntamba_css_vars(){ $vars=array('--coffee'=>get_theme_mod('ntamba_color_coffee','#4A3728'),'--green'=>get_theme_mod('ntamba_color_green','#2D5A27'),'--gold'=>get_theme_mod('ntamba_color_gold','#D4A017'),'--cream'=>get_theme_mod('ntamba_color_cream','#F9F7F2'));$css=':root{';foreach($vars as $k=>$v)$css.=$k.':'.esc_html($v).';';$css.='}';wp_add_inline_style('ntamba-style',$css);}
 add_action('wp_enqueue_scripts','ntamba_css_vars',20);
 
-function ntamba_activate(){foreach(array('home'=>'Home','about'=>'About Us','wholesale'=>'Wholesale & Export','contact'=>'Contact','journal'=>'Journal') as $slug=>$title){if(!get_page_by_path($slug))wp_insert_post(array('post_title'=>$title,'post_name'=>$slug,'post_status'=>'publish','post_type'=>'page'));}}
+function ntamba_activate(){
+ $templates=array('about'=>'page-about-us.php','wholesale'=>'page-wholesale.php','contact'=>'page-contact-us.php');
+ $pages=array();
+ foreach(array('home'=>'Home','about'=>'About Us','wholesale'=>'Wholesale & Export','contact'=>'Contact','journal'=>'Journal') as $slug=>$title){
+  $page=get_page_by_path($slug);
+  if(!$page){$id=wp_insert_post(array('post_title'=>$title,'post_name'=>$slug,'post_status'=>'publish','post_type'=>'page'));$page=get_post($id);}
+  if($page){$pages[$slug]=$page->ID;if(isset($templates[$slug]))update_post_meta($page->ID,'_wp_page_template',$templates[$slug]);}
+ }
+ if(isset($pages['home'])){update_option('show_on_front','page');update_option('page_on_front',$pages['home']);}
+}
 add_action('after_switch_theme','ntamba_activate');
 
 function ntamba_contact_submit(){
