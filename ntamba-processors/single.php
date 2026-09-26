@@ -1,0 +1,1 @@
+<?php get_header(); ?><main id="primary" class="content-area"><div class="container"><article class="entry-content"><?php while(have_posts()):the_post(); ?><div class="section-kicker"><?php ntamba_posted_on(); ?></div><h1><?php the_title(); ?></h1><?php ntamba_thumbnail('large'); ?><div><?php the_content(); ?></div><?php endwhile; ?></article></div></main><?php get_footer(); ?>
