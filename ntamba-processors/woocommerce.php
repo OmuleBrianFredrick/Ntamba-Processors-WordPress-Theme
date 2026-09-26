@@ -1,0 +1,1 @@
+<?php get_header(); ?><main id="primary" class="content-area"><div class="container"><?php ntamba_wc_render(); ?></div></main><?php get_footer(); ?>
