@@ -1,6 +1,6 @@
 <?php
 if(!defined('ABSPATH')) exit;
-define('NTAMBA_VERSION','1.0.0');
+define('NTAMBA_VERSION','1.2.0');
 define('NTAMBA_URI',get_template_directory_uri());
 
 function ntamba_setup(){
@@ -8,7 +8,7 @@ function ntamba_setup(){
  add_theme_support('title-tag'); add_theme_support('post-thumbnails');
  add_theme_support('custom-logo',array('height'=>80,'width'=>260,'flex-height'=>true,'flex-width'=>true));
  add_theme_support('html5',array('search-form','comment-form','comment-list','gallery','caption','style','script'));
- add_theme_support('automatic-feed-links'); add_theme_support('woocommerce');
+ add_theme_support('automatic-feed-links'); add_theme_support('woocommerce',array('thumbnail_image_width'=>600,'single_image_width'=>1000,'product_grid'=>array('default_rows'=>4,'min_rows'=>1,'max_rows'=>8,'default_columns'=>4,'min_columns'=>1,'max_columns'=>4)));
  register_nav_menus(array('primary'=>'Primary Menu','footer'=>'Footer Menu'));
 }
 add_action('after_setup_theme','ntamba_setup');
@@ -69,3 +69,17 @@ function ntamba_wc_render(){
   if($products){echo '<div class="product-grid">';foreach($products as $p){$weight=$p->get_weight();$unit=get_option('woocommerce_weight_unit');$gtin=ntamba_gtin($p);echo '<article class="product-card"><a class="product-thumb" href="'.esc_url(get_permalink($p->get_id())).'">';if($p->get_image_id())echo wp_get_attachment_image($p->get_image_id(),'woocommerce_thumbnail',false,array('loading'=>'lazy'));else echo '<div style="font-weight:900;color:var(--coffee)">NTAMBA</div>';echo '</a><div class="product-body"><div class="product-meta">'.esc_html($weight!==''?$weight.' '.$unit:($p->get_sku()?'SKU '.$p->get_sku():'')).'</div><h3><a href="'.esc_url(get_permalink($p->get_id())).'">'.esc_html($p->get_name()).'</a></h3><div class="product-price">'.wp_kses_post($p->get_price_html()).'</div>';if($gtin)echo '<div class="product-meta">GTIN/EAN: '.esc_html($gtin).'</div>';echo '<div class="product-actions">'.wp_kses_post(sprintf('<a class="button" href="%s">View Product</a>',esc_url(get_permalink($p->get_id())))).'</div></div></article>';}echo '</div>';}else echo '<div class="notice">No products found.</div>';
  }else woocommerce_content();
 }
+
+
+/* WooCommerce storefront polish */
+add_filter('woocommerce_enqueue_styles',function($styles){return $styles;});
+add_filter('woocommerce_breadcrumb_defaults',function($defaults){$defaults['delimiter']=' <span class="breadcrumb-separator">/</span> ';return $defaults;});
+add_action('woocommerce_before_main_content',function(){echo '<div class="container content-area woocommerce-area">';},5);
+add_action('woocommerce_after_main_content',function(){echo '</div>';},5);
+add_action('woocommerce_before_shop_loop',function(){echo '<div class="shop-toolbar"><div class="shop-result-count">';},19);
+add_action('woocommerce_before_shop_loop',function(){echo '</div><div class="shop-ordering">';},30);
+add_action('woocommerce_before_shop_loop',function(){echo '</div></div>';},40);
+add_action('woocommerce_before_single_product',function(){echo '<div class="container content-area">';},5);
+add_action('woocommerce_after_single_product',function(){echo '</div>';},5);
+add_action('woocommerce_single_product_summary',function(){global $product;if($product){$gtin=ntamba_gtin($product);if($gtin)echo '<div class="product-code"><strong>GTIN/EAN:</strong> '.esc_html($gtin).'</div>'; }},39);
+add_filter('body_class',function($classes){if(function_exists('is_woocommerce') && is_woocommerce())$classes[]='ntamba-commerce';return $classes;});
