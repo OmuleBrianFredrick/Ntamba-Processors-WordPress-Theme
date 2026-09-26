@@ -1,6 +1,6 @@
 <?php
 if(!defined('ABSPATH')) exit;
-define('NTAMBA_VERSION','1.3.1');
+define('NTAMBA_VERSION','1.3.2');
 define('NTAMBA_URI',get_template_directory_uri());
 
 function ntamba_setup(){
@@ -53,7 +53,11 @@ function ntamba_contact_submit(){
  $ok=wp_mail($to,$subject?:'Ntamba website enquiry',$message,array('Reply-To: '.$name.' <'.$email.'>'));wp_safe_redirect(add_query_arg('sent',$ok?'1':'0',wp_get_referer()?:home_url('/contact/')));exit;
 }
 add_action('admin_post_ntamba_contact','ntamba_contact_submit');add_action('admin_post_nopriv_ntamba_contact','ntamba_contact_submit');
-function ntamba_gtin($product){foreach(array('_global_unique_id','_gtin','gtin','_wc_gla_gtin','_alg_ean','_ean') as $k){$v=get_post_meta($product->get_id(),$k,true);if($v!=='')return $v;}return '';}
+function ntamba_gtin($product){if (is_object($product) && method_exists($product,'get_global_unique_id')) {
+  $v=$product->get_global_unique_id();
+  if($v!=='') return $v;
+}
+foreach(array('_global_unique_id','_gtin','gtin','_wc_gla_gtin','_alg_ean','_ean') as $k){$v=get_post_meta($product->get_id(),$k,true);if($v!=='')return $v;}return '';}
 function ntamba_posted_on(){echo '<span>'.esc_html(get_the_date()).'</span>';}
 function ntamba_thumbnail($size='large'){if(has_post_thumbnail())the_post_thumbnail($size,array('loading'=>'lazy'));}
 function ntamba_cat_url($slug){if(taxonomy_exists('product_cat')){$t=get_term_by('slug',$slug,'product_cat');if($t&&!is_wp_error($t))return get_term_link($t);}return function_exists('wc_get_page_permalink')?wc_get_page_permalink('shop'):home_url('/shop/');}
@@ -66,7 +70,39 @@ function ntamba_wc_render(){
   if(is_product_category())$args['category']=array(get_queried_object()->slug);
   $result=wc_get_products($args);$products=$result->products;
   echo '<header class="section-heading"><div class="section-kicker">The Ntamba Collection</div><h1>'.esc_html(is_product_category()?single_term_title('',false):'The Ntamba Collection').'</h1><p>Ethically sourced, meticulously processed, and packed for freshness in Uganda.</p></header>';
-  if($products){echo '<div class="product-grid">';foreach($products as $p){$weight=$p->get_weight();$unit=get_option('woocommerce_weight_unit');$gtin=ntamba_gtin($p);echo '<article class="product-card"><a class="product-thumb" href="'.esc_url(get_permalink($p->get_id())).'">';if($p->get_image_id())echo wp_get_attachment_image($p->get_image_id(),'woocommerce_thumbnail',false,array('loading'=>'lazy'));else echo '<div style="font-weight:900;color:var(--coffee)">NTAMBA</div>';echo '</a><div class="product-body"><div class="product-meta">'.esc_html($weight!==''?$weight.' '.$unit:($p->get_sku()?'SKU '.$p->get_sku():'')).'</div><h3><a href="'.esc_url(get_permalink($p->get_id())).'">'.esc_html($p->get_name()).'</a></h3><div class="product-price">'.wp_kses_post($p->get_price_html()).'</div>';if($gtin)echo '<div class="product-meta">GTIN/EAN: '.esc_html($gtin).'</div>';echo '<div class="product-actions">'.wp_kses_post(sprintf('<a class="button" href="%s">View Product</a>',esc_url(get_permalink($p->get_id())))).'</div></div></article>';}echo '</div>';}else echo '<div class="notice">No products found.</div>';
+  if($products){
+  echo '<div class="product-grid">';
+  foreach($products as $p){
+    $weight=$p->get_weight();
+    $unit=get_option('woocommerce_weight_unit');
+    $gtin=ntamba_gtin($p);
+    $product_url=get_permalink($p->get_id());
+    $add_to_cart='';
+    if($p->is_purchasable() && $p->is_in_stock() && $p->supports('ajax_add_to_cart') && $p->is_type('simple')){
+      $add_to_cart=sprintf('<a class="button button--outline-dark add_to_cart_button ajax_add_to_cart" href="%s" data-quantity="1" data-product_id="%d" data-product_sku="%s" aria-label="%s">%s</a>',
+        esc_url($p->add_to_cart_url()),$p->get_id(),esc_attr($p->get_sku()),esc_attr(sprintf('Add %s to your cart',$p->get_name())),esc_html__('Add to cart','ntamba-processors'));
+    }
+    echo '<article class="product-card"><a class="product-thumb" href="'.esc_url($product_url).'">';
+    if($p->get_image_id())echo wp_get_attachment_image($p->get_image_id(),'woocommerce_thumbnail',false,array('loading'=>'lazy'));
+    else echo '<div style="font-weight:900;color:var(--coffee)">NTAMBA</div>';
+    echo '</a><div class="product-body"><div class="product-meta">'.esc_html($weight!==''?$weight.' '.$unit:($p->get_sku()?'SKU '.$p->get_sku():'')).'</div><h3><a href="'.esc_url($product_url).'">'.esc_html($p->get_name()).'</a></h3><div class="product-price">'.wp_kses_post($p->get_price_html()).'</div>';
+    if($gtin)echo '<div class="product-meta">GTIN/EAN: '.esc_html($gtin).'</div>';
+    echo '<div class="product-actions"><a class="button" href="'.esc_url($product_url).'">'.esc_html__('View Product','ntamba-processors').'</a>'.$add_to_cart.'</div></div></article>';
+  }
+  echo '</div>';
+  $max_pages=isset($result->max_num_pages)?(int)$result->max_num_pages:1;
+  if($max_pages>1){
+    echo '<nav class="ntamba-pagination" aria-label="'.esc_attr__('Product navigation','ntamba-processors').'">'.wp_kses_post(paginate_links(array(
+      'base'=>str_replace('999999999','%#%',esc_url_raw(get_pagenum_link(999999999))),
+      'format'=>'',
+      'current'=>max(1,get_query_var('paged')?get_query_var('paged'):get_query_var('page')),
+      'total'=>$max_pages,
+      'type'=>'list',
+      'prev_text'=>'←',
+      'next_text'=>'→',
+    ))).'</nav>';
+  }
+}else echo '<div class="notice">No products found.</div>';
  }else woocommerce_content();
 }
 
