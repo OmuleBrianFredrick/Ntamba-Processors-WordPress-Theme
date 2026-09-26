@@ -71,6 +71,20 @@ function ntamba_wc_render(){
 }
 
 
+function ntamba_single_product_context(){
+ if(!function_exists('is_product') || !is_product()) return;
+ global $product;
+ if(!$product) return;
+ $terms=get_the_terms($product->get_id(),'product_cat');
+ $label='Ntamba Collection';
+ if($terms && !is_wp_error($terms)) $label=$terms[0]->name;
+ echo '<div class="ntamba-product-context">';
+ echo '<a class="ntamba-back-link" href="'.esc_url(wc_get_page_permalink('shop')).'">← Back to the Ntamba Collection</a>';
+ echo '<span class="ntamba-product-eyebrow">'.esc_html($label).'</span>';
+ echo '</div>';
+}
+add_action('woocommerce_single_product_summary','ntamba_single_product_context',4);
+
 /* WooCommerce storefront polish */
 add_filter('woocommerce_enqueue_styles',function($styles){return $styles;});
 add_filter('woocommerce_breadcrumb_defaults',function($defaults){$defaults['delimiter']=' <span class="breadcrumb-separator">/</span> ';return $defaults;});
