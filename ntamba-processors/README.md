@@ -5,7 +5,7 @@ Original WordPress/WooCommerce theme for Ntamba Processors Limited.
 ## Production baseline
 
 - WordPress 6.3 or newer
-- PHP 8.3 or newer
+- PHP 8.2 or newer (PHP 8.3+ recommended)
 - WooCommerce installed and activated for the storefront
 - HTTPS enabled on the live site
 - A MySQL/MariaDB database supported by the installed WordPress version
@@ -58,7 +58,7 @@ The visual direction is original to Ntamba Processors and uses the provided Kaff
 
 ## Installation
 
-1. Install WordPress on a PHP 8.3+ hosting environment.
+1. Install WordPress on a PHP 8.2+ hosting environment (PHP 8.3+ recommended).
 2. Install and activate WooCommerce.
 3. Download or clone this repository.
 4. The installable theme directory is `ntamba-processors/`.
