@@ -1,6 +1,10 @@
 #!/bin/sh
 set -e
 
+# UID 33 has no writable home directory in the CLI image.
+export WP_CLI_CACHE_DIR=/tmp/wp-cli-cache
+mkdir -p "$WP_CLI_CACHE_DIR"
+
 cd /var/www/html
 
 # Skip if already done

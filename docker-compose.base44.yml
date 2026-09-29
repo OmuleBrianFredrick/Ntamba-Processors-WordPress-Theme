@@ -36,7 +36,7 @@ services:
       db:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "curl -s -o /dev/null -w '%{http_code}' http://localhost:80/ | grep -qE '^(200|301|302)$'"]
+      test: ["CMD-SHELL", "curl --fail --silent --show-error --max-time 4 -H \"Host: 3000-$$BASE44_PUBLIC_HOST_SUFFIX\" -o /dev/null -w '%{http_code}' http://localhost:80/ | grep -qx '200'"]
       interval: 10s
       timeout: 5s
       retries: 6

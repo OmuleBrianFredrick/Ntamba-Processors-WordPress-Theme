@@ -12,7 +12,7 @@ WordPress/WooCommerce classic PHP theme (not a Node.js app). The repo contains t
 ```
 docker compose -f docker-compose.base44.yml up -d
 ```
-The setup container runs automatically on first boot. Check its logs with:
+The setup container runs automatically on first boot. `Exited (0)` is expected for this one-shot job, not an application failure; `.base44-setup-done` in the WordPress volume records completion. Its CLI cache uses `/tmp/wp-cli-cache` because UID 33 has no writable home. The WordPress healthcheck sends the configured public Host header and requires HTTP 200, rather than treating a canonical redirect as proof the theme renders. Check its logs with:
 ```
 docker compose -f docker-compose.base44.yml logs setup
 ```
